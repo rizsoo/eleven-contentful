@@ -1,0 +1,19 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-size: cover;
+    background-position: 0px -400px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.0415625em;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+h3 {}
