@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react'
 import { PageContentSection } from '../components/PageContentSection';
 
 const PageTemplate = ({ data: { page, event, navbar } }) => {
-  console.log(navbar);
   console.log(page);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -37,6 +36,26 @@ query MyQuery($slug: String, $node_locale: String) {
               description
               file {
                 url
+              }
+            }
+            ... on ContentfulTrainingsList {
+              __typename
+              contentful_id
+              events {
+                title
+                slug
+                description {
+                  description
+                }
+                image {
+                  url
+                }
+                dates {
+                  location
+                  link
+                  date
+                  duration
+                }
               }
             }
          }  
