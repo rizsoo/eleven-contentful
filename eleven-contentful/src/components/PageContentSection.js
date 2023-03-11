@@ -2,9 +2,10 @@ import React from 'react'
 import styled from 'styled-components'
 import { Navbar } from './Navbar'
 import { Localization } from './Localization'
-import { TrainingsCards } from './TrainingsCards'
+import { TrainingsCards } from './Trainingcards/TrainingsCards'
 import { BLOCKS, INLINES } from "@contentful/rich-text-types"
 import { renderRichText } from "gatsby-source-contentful/rich-text"
+import { TrainingCalendar } from './Trainingcalendar/TrainingCalendar'
 
 
 export const PageContentSection = ({ title, content, navbar, lang }) => {
@@ -31,6 +32,13 @@ export const PageContentSection = ({ title, content, navbar, lang }) => {
                     case "ContentfulTrainingsList":
                         return (
                             <TrainingsCards
+                                props={data.events}
+                                lang={lang}
+                            />
+                        )
+                    case "ContentfulTrainingCalendar":
+                        return (
+                            <TrainingCalendar
                                 props={data.events}
                                 lang={lang}
                             />

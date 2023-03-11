@@ -55,6 +55,38 @@ query MyQuery($slug: String, $node_locale: String) {
                   link
                   date
                   duration
+                  level
+                }
+              }
+            }
+            ... on ContentfulTrainingCalendar {
+              __typename
+              contentful_id
+              events {
+                title
+                slug
+                description {
+                  description
+                }
+                image {
+                  url
+                }
+                icon {
+                  url
+                }
+                dates {
+                  location
+                  link
+                  date
+                  duration
+                  day
+                  level
+                  event {
+                    title
+                    icon {
+                      url
+                    }
+                  }
                 }
               }
             }

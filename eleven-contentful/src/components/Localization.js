@@ -78,6 +78,9 @@ export const Flag = styled.div`
         z-index: 5;
         transition: all ease-in-out 0.1s;
     }
+    a {
+        display: flex;
+    }
     img:hover {
         transform: scale(1.07);
         z-index: 15;

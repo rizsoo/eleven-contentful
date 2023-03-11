@@ -21,6 +21,10 @@ h1 {
     font-weight: 800;
 }
 
+h2 {
+    margin-bottom: 25px;
+}
+
 li {
     font-weight: 500;
 }

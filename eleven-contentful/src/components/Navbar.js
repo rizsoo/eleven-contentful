@@ -6,7 +6,6 @@ import { BsFacebook, BsInstagram } from 'react-icons/bs'
 import { BiMenuAltLeft } from 'react-icons/bi'
 import logo from '../assets/eleven_logo_noblack.png'
 
-
 export const Navbar = ({ navbar, lang }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -42,7 +41,7 @@ export const NavBox = styled.div`
     position: relative;
 `
 export const NavContent = styled.div`
-    max-width: 1200px;
+    max-width: 1300px;
     margin: 0 auto;
     padding: 20px;
     background-color: black;
