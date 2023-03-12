@@ -4,9 +4,6 @@ import { Calendar } from './Calendar';
 import { TrainCalItem } from './TrainCalItem'
 
 export const TrainingCalendar = ({ props, lang }) => {
-    console.log(props);
-
-    // TUESDAY
 
     function getDateFunction(num) {
         var d = new Date();
@@ -19,35 +16,30 @@ export const TrainingCalendar = ({ props, lang }) => {
             index: 1,
             english: "Mon",
             hungarian: "Hét",
-            tag: 'monday',
             day: getDateFunction(1)
         },
         {
             index: 2,
             english: "Tue",
             hungarian: "Kedd",
-            tag: 'tuesday',
             day: getDateFunction(2)
         },
         {
             index: 3,
             english: "Wed",
             hungarian: "Szer",
-            tag: 'wednesday',
             day: getDateFunction(3)
         },
         {
             index: 4,
             english: "Thur",
             hungarian: "Csüt",
-            tag: 'thursday',
             day: getDateFunction(4)
         },
         {
             index: 5,
             english: "Fri",
             hungarian: "Pén",
-            tag: 'friday',
             day: getDateFunction(5)
         },
     ]
@@ -57,7 +49,7 @@ export const TrainingCalendar = ({ props, lang }) => {
     function renderNextDay(num) {
         let upper = datelist.filter(el => el.index >= num).sort((a, b) => (a.index < num) ? 1 : -1)
         let lower = datelist.filter(el => el.index < num).sort((a, b) => b - a);
-        console.log([...upper, ...lower]);
+        // console.log([...upper, ...lower]);
         return [...upper, ...lower]
     }
     renderNextDay(5);
@@ -65,11 +57,12 @@ export const TrainingCalendar = ({ props, lang }) => {
     return (
         <Frame>
             <ListHolder>
+                <h2>{lang.node_locale === "hu" ? "Közelgő események" : "Upcoming events"}</h2>
                 {renderNextDay(current).map(date => {
-                    let result = props.map(el => el.dates.filter(d => d.day === date.tag)).filter(el => el.length > 0)[0]
-                    // console.log(result);
+                    let result = props.map(el => el.dates.filter(d => new Date(d.date.split('T').shift()).getDay() === date.index)).filter(el => el.length > 0)[0]
                     return (
                         <Block>
+
                             <Day>
                                 <DateNumber>{date.day.getDate()}</DateNumber>
                                 <b>{monthes[date.day.getMonth()]}</b>
@@ -99,18 +92,23 @@ export const TrainingCalendar = ({ props, lang }) => {
                     )
                 })}
             </ListHolder>
-            <Calendar lang={lang} />
+            <Calendar lang={lang} props={props} />
         </Frame>
     )
 }
 
 export const Frame = styled.div`
     display: flex;
+    margin: 30px 0;
+    @media (max-width: 650px) {
+        flex-direction: column;
+    }
 `
 export const ListHolder = styled.div`
     display: flex;
     flex-direction: column;
     width: 100%;
+    margin-right: 40px;
 `
 export const Block = styled.div`
     display: flex;
@@ -174,6 +172,7 @@ export const Item = styled.div`
     }
     img {
         height: 30px;
+        transition: all ease 0.2s;
     }
     h4 {
         color: grey;
@@ -190,8 +189,9 @@ export const Item = styled.div`
         }
     }
     &:hover {
-        transform: scale(1.01);
-        transition: all ease 0.2s;
+        img {
+            transform: scale(1.07) rotate(30deg);
+        }
     }
 `
 export const Left = styled.div`

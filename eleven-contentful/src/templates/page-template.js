@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 import { PageContentSection } from '../components/PageContentSection';
 
 const PageTemplate = ({ data: { page, event, navbar } }) => {
-  console.log(page);
+  // console.log(page);
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
@@ -79,7 +79,7 @@ query MyQuery($slug: String, $node_locale: String) {
                   link
                   date
                   duration
-                  day
+                  repeat
                   level
                   event {
                     title

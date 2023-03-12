@@ -5,7 +5,7 @@ import { BsFillArrowRightCircleFill } from "react-icons/bs";
 import { TrainCard } from "./TrainCard";
 
 export const TrainingsCards = ({ props, lang }) => {
-    console.log(lang);
+    // console.log(lang);
     return (
         <TrainContent>
             {props.map(el => {

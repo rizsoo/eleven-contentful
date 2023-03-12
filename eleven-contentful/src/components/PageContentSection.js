@@ -9,7 +9,7 @@ import { TrainingCalendar } from './Trainingcalendar/TrainingCalendar'
 
 
 export const PageContentSection = ({ title, content, navbar, lang }) => {
-    console.log(content);
+    // console.log(content);
 
     const options = {
         renderNode: {
@@ -64,13 +64,13 @@ export const PageContentSection = ({ title, content, navbar, lang }) => {
 }
 
 export const PageTitle = styled.h2`
-    max-width: 1000px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 20px;
 `
 
 export const PageContent = styled.div`
-    max-width: 1000px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 0 20px;
 `
