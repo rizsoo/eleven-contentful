@@ -2,8 +2,11 @@ import React from 'react'
 import styled from 'styled-components';
 import { Calendar } from './Calendar';
 import { TrainCalItem } from './TrainCalItem'
+import { useState } from 'react';
+import { DateElement } from './DateElement';
 
 export const TrainingCalendar = ({ props, lang }) => {
+    const [choosenDateAndHour, setChoosenDateAndHour] = useState([])
 
     function getDateFunction(num) {
         var d = new Date();
@@ -43,7 +46,11 @@ export const TrainingCalendar = ({ props, lang }) => {
             day: getDateFunction(5)
         },
     ]
-    const monthes = ["Jan", "Febr", "Márc", "Ápr", "Máj", "Jún", "Júl", "Aug", "Sep", "Okt", "Nov", "Dec"];
+    const full_weekdays_en = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    const full_weekdays_hu = ['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek']
+
+    const monthes_hu = ["Január", "Február", "Március", "Április", "Május", "Június", "Július", "Augusztus", "Szeptember", "Október", "November", "December"];
+    const monthes_en = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "Oktober", "November", "December"];
     const current = new Date().getDay();
 
     function renderNextDay(num) {
@@ -54,46 +61,52 @@ export const TrainingCalendar = ({ props, lang }) => {
     }
     renderNextDay(5);
 
-    return (
-        <Frame>
-            <ListHolder>
-                <h2>{lang.node_locale === "hu" ? "Közelgő események" : "Upcoming events"}</h2>
-                {renderNextDay(current).map(date => {
-                    let result = props.map(el => el.dates.filter(d => new Date(d.date.split('T').shift()).getDay() === date.index)).filter(el => el.length > 0)[0]
-                    return (
-                        <Block>
+    // console.log(choosenDateAndHour);
 
-                            <Day>
-                                <DateNumber>{date.day.getDate()}</DateNumber>
-                                <b>{monthes[date.day.getMonth()]}</b>
-                                {lang.node_locale === "hu" ? date.hungarian : date.english}
-                            </Day>
-                            <List>
-                                {result !== undefined ?
-                                    result.map(el => {
-                                        let title = el.event[0].title;
-                                        let icon = el.event[0].icon;
-                                        return (
-                                            <Item>
-                                                <Left>
-                                                    <img src={icon.url} alt="" />
-                                                    <span>
-                                                        <h3>{title}</h3>
-                                                        <p>{el.date.split("T").pop() + " - " + el.duration}</p>
-                                                    </span>
-                                                </Left>
-                                                <h4>{el.level}</h4>
-                                            </Item>
-                                        )
-                                    })
-                                    : <Placeholder>No event today!</Placeholder>}
-                            </List>
-                        </Block>
-                    )
-                })}
-            </ListHolder>
-            <Calendar lang={lang} props={props} />
-        </Frame>
+    return (
+        <>
+            <Frame>
+                <ListHolder>
+                    <h2>{lang.node_locale === "hu" ? "Közelgő edzések" : "Upcoming events"}</h2>
+                    {renderNextDay(current).map(date => {
+                        let result = props.map(el => el.dates.filter(d => new Date(d.date.split('T').shift()).getDay() === date.index)).filter(el => el.length > 0)[0]
+                        return (
+                            <Block>
+                                <Day>
+                                    <DateNumber>{date.day.getDate()}</DateNumber>
+                                    <b>{lang.node_locale === "hu" ? monthes_hu[date.day.getMonth()] : monthes_en[date.day.getMonth()]}</b>
+                                    {lang.node_locale === "hu" ? full_weekdays_hu[date.day.getDay() - 1] : full_weekdays_en[date.day.getDay() - 1]}
+                                </Day>
+                                <List>
+                                    {result !== undefined ?
+                                        result.map(el => {
+                                            console.log(el);
+                                            let title = el.event[0].title;
+                                            let icon = el.event[0].icon.url;
+                                            let element = el.date
+                                            let underLabel = el.date.split('T').pop()
+                                            return (
+                                                <DateElement
+                                                    element={element}
+                                                    label={title}
+                                                    icon={icon}
+                                                    underLabel={underLabel}
+                                                    el={el}
+                                                    choosenDateAndHour={choosenDateAndHour}
+                                                    setChoosenDateAndHour={setChoosenDateAndHour} />
+                                            )
+                                        })
+                                        : <Placeholder>No event today!</Placeholder>}
+                                </List>
+                            </Block>
+                        )
+                    })}
+                </ListHolder>
+                <Calendar lang={lang} props={props} choosenDateAndHour={choosenDateAndHour} setChoosenDateAndHour={setChoosenDateAndHour} />
+            </Frame>
+            <ApplyBtn disabled={choosenDateAndHour.length > 0 ? false : true} onClick={() => alert('Hamarosan!')}>{lang.node_locale === "hu" ? "Jelentkezem" : "Apply"}</ApplyBtn>
+        </>
+
     )
 }
 
@@ -111,18 +124,23 @@ export const ListHolder = styled.div`
     margin-right: 40px;
 `
 export const Block = styled.div`
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 5fr;
     margin: 10px 0;
-    padding-bottom: 10px;
 `
 
 export const Day = styled.p`
     border-top: 1px solid black;
-    width: min-width;
     padding: 10px 10px 0 10px;
+    width: 95px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    font-size: 15px;
+    letter-spacing: -0.2px;
+    b {
+        font-size: 12px;
+    }
     @media (max-width: 650px) {
         padding: 10px 10px 0 0;
     }
@@ -138,7 +156,7 @@ export const DateNumber = styled.h3`
     align-items: center;
     justify-content: center;
     font-size: 25px;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 `
 export const List = styled.div`
@@ -152,48 +170,7 @@ export const List = styled.div`
        
     }
 `
-export const Item = styled.div`
-    padding: 8px 16px;
-    border-radius: 15px;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 
-    min-height: 70px;
-
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    justify-content: space-between;
-    h3 {
-        line-height: 25px;
-    }
-    p {
-        font-size: 14px;
-        color: grey;
-    }
-    img {
-        height: 30px;
-        transition: all ease 0.2s;
-    }
-    h4 {
-        color: grey;
-        border: 2px solid #d9d9d9;
-        border-radius: 7px;
-        font-weight: 400;
-        font-size: 14px;
-        padding: 2px 7px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        @media (max-width: 650px) {
-            display: none;
-        }
-    }
-    &:hover {
-        img {
-            transform: scale(1.07) rotate(30deg);
-        }
-    }
-`
 export const Left = styled.div`
     display: flex;
     gap: 10px;
@@ -215,4 +192,20 @@ export const Placeholder = styled.div`
     color: lightgrey;
     height: 70px;
     background-color: #f9f9f9;
+`
+
+export const ApplyBtn = styled.button`
+    width: 100%;
+    padding: 10px;
+    border-radius: 50px;
+    border: unset;
+    margin: 50px auto;
+    background-color: ${props => props.disabled ? 'grey' : 'black'};
+    color: ${props => props.disabled ? 'lightgrey' : 'white'};
+    
+    font-family: inherit;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    ${props => props.disabled ? null : 'cursor: pointer;'}
 `

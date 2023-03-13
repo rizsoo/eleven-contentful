@@ -29,3 +29,8 @@ h2 {
 li {
     font-weight: 500;
 }
+
+img {
+    max-width: 100%;
+    margin: 20px 0;
+}

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 import { PageContentSection } from '../components/PageContentSection';
 
 const PageTemplate = ({ data: { page, event, navbar } }) => {
-  // console.log(page);
+  console.log(page);
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
@@ -17,7 +17,7 @@ const PageTemplate = ({ data: { page, event, navbar } }) => {
       </Helmet>
       <PageContentSection
         title={page ? page.title : event.title}
-        content={page && page.content}
+        content={page ? page.content : event.content}
         navbar={navbar}
         lang={page ? page : event} />
     </>

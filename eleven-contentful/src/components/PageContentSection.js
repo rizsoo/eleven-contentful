@@ -25,6 +25,22 @@ export const PageContentSection = ({ title, content, navbar, lang }) => {
                 let link = node.data.uri
                 return <a href={link} target={link.includes("http") && "_blank"} rel="noreferrer">{node.content[0].value}</a>
             },
+            [BLOCKS.PARAGRAPH]: (node) => {
+                console.log(node.content);
+                let data = node.content.map(el => {
+                    if (el.marks[0] && el.marks[0].type === "bold") {
+                        return (
+                            <Paragraph><b>{el.value}</b></Paragraph>
+                        )
+                    } else {
+                        return (
+                            <Paragraph>{el.value}</Paragraph>
+                        )
+                    }
+
+                })
+                return data
+            },
             [BLOCKS.EMBEDDED_ENTRY]: (node) => {
                 // console.log(node);
                 let data = node.data.target
@@ -73,4 +89,11 @@ export const PageContent = styled.div`
     max-width: 1100px;
     margin: 0 auto;
     padding: 0 20px;
+`
+
+export const Paragraph = styled.p`
+    margin-top: 12px;
+    b {
+        font-weight: 600;
+    }
 `

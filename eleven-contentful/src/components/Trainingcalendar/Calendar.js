@@ -4,8 +4,11 @@ import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import { useState } from 'react';
 import ReactCalendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import { DateElement } from './DateElement';
+import { BsDashCircleFill } from "react-icons/bs";
+import { Placeholder } from './TrainingCalendar';
 
-export const Calendar = ({ lang, props }) => {
+export const Calendar = ({ lang, props, choosenDateAndHour, setChoosenDateAndHour }) => {
 
     const [month, setMonth] = useState(new Date().getMonth())
     const [year, setYear] = useState(new Date().getFullYear())
@@ -14,8 +17,11 @@ export const Calendar = ({ lang, props }) => {
 
     const weekdays_en = ['Mon', 'Tues', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun']
     const weekdays_hu = ['Hét', 'Kedd', 'Szer', 'Csüt', 'Pén', 'Szom', 'Vas']
+    const full_weekdays_en = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    const full_weekdays_hu = ['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat', 'Vasárnap']
 
     let language = lang.node_locale === "hu" ? weekdays_hu : weekdays_en
+    let full_language = lang.node_locale === "hu" ? full_weekdays_hu : full_weekdays_en
 
     const monthes_hu = ["Január", "Február", "Március", "Április", "Május", "Június", "Július", "Augusztus", "Szeptember", "Október", "November", "December"];
     const monthes_en = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -50,26 +56,46 @@ export const Calendar = ({ lang, props }) => {
     firstdays.pop()
 
     // Show if there is something on a specific day
-    function getDataFromEvents() {
-        let dataArray = props.map(el => el.dates).flat(1).map(el => {
-            const originalDate = el.date.split('T').shift();
-            return originalDate
-        })
-        let repeatDate = props.map(el => el.dates).flat(1).map(el => {
-            let repeat = el.date.split('T').shift();
-            if (el.repeat) {
-                let today = new Date(repeat);
-                let nextweek = new Date(today.getFullYear(), today.getMonth(), today.getDate() + el.repeat);
-                let howFar = nextweek.getDate() - current_day < 7 ? true : false;
-                let trueDate = howFar ? `${nextweek.getFullYear()}-${nextweek.getMonth() < 9 && '0'}${nextweek.getMonth() + 1}-${nextweek.getDate()}` : '';
-                return trueDate;
-            }
-            return repeat
-        })
-        let result = [...dataArray, ...repeatDate]
-        return result
+    function getDatesInRange(originalDate, repeatNum) {
+        let today = new Date(),
+            startDate = new Date(originalDate),
+            endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 14);
+
+        const date = new Date(startDate.getTime());
+
+        const dates = [];
+
+        while (date <= endDate) {
+            dates.push(new Date(date));
+            date.setDate(date.getDate() + repeatNum);
+        }
+
+        return dates
     }
-    console.log(props.map(el => el.dates).flat(1));
+
+    let eventDateList = props.map(el => el.dates).flat(1).map(el => {
+        const res = getDatesInRange(el.date.split('T').shift(), el.repeat).map(el => `${el.getFullYear()}-${month < 9 && '0'}${el.getMonth() + 1}-${el.getDate()}`);
+        return res
+    })
+    let eventHourList = props.map(el => el.dates).flat(1).map(el => {
+        const newDate = getDatesInRange(el.date, el.repeat);
+        const eventTitle = el.event[0].title;
+        const eventIcon = el.event[0].icon
+        const eventLevel = el.level
+        const eventDuration = el.duration
+        let res = newDate.map(el => ({
+            title: eventTitle,
+            icon: eventIcon.url,
+            level: eventLevel,
+            duration: eventDuration,
+            date: `${el.getFullYear()}-${month < 9 && '0'}${el.getMonth() + 1}-${el.getDate()}`,
+            hour: `${el.getHours()}:${el.getMinutes() === 0 ? '0' : ''}${el.getMinutes()}`,
+            compare: `${el.getFullYear()}-${month < 9 && '0'}${el.getMonth() + 1}-${el.getDate()}` + 'T' + `${el.getHours()}:${el.getMinutes() === 0 ? '0' : ''}${el.getMinutes()}`
+        }))
+        return res
+    })
+
+    let jesus = eventHourList.flat(1)
 
     return (
         <Content>
@@ -77,7 +103,7 @@ export const Calendar = ({ lang, props }) => {
             <Block>
                 <p><b>{lang.node_locale === "hu" ? monthes_hu[month] : monthes_en[month]}</b> {year}</p>
                 <span>
-                    <BsChevronLeft onClick={() => changeMonth(true)} style={month === current_month && year === current_year && { color: "lightgrey" }} />
+                    <BsChevronLeft onClick={() => changeMonth(true)} style={month === current_month && year === current_year && { color: "grey" }} />
                     <BsChevronRight onClick={() => changeMonth(false)} />
                 </span>
             </Block>
@@ -97,7 +123,7 @@ export const Calendar = ({ lang, props }) => {
                             <Num
                                 index={i}
                                 day={day}
-                                dataArray={getDataFromEvents()}
+                                dataArray={eventDateList.flat(1)}
                                 result={result}
                                 value={value}
                                 sameMonth={current_month === month}
@@ -111,13 +137,42 @@ export const Calendar = ({ lang, props }) => {
                 </Days>
             </Dates>
             <Hours>
-                <h3>{lang.node_locale === "hu" ? "Szabad időpontok" : "Hours available"}</h3>
-                {props.map(el => el.dates).flat(1).filter(el => el.date.split("T").shift() === result).map(el => {
+                {result && <h3>{lang.node_locale === "hu" ? "Szabad időpontok" : "Hours available"}</h3>}
+                {jesus.filter(el => el.date === result).length > 0 ?
+                    jesus.filter(el => el.date === result).map(el => {
+                        let element = `${result}T${el.hour}`
+                        let label = `${el.hour} - ${el.title}`
+                        let underLabel = el.date
+                        let icon = el.icon
+                        return (
+                            <DateElement
+                                element={element}
+                                label={label}
+                                icon={icon}
+                                el={el}
+                                underLabel={underLabel}
+                                choosenDateAndHour={choosenDateAndHour}
+                                setChoosenDateAndHour={setChoosenDateAndHour} />
+                        )
+                    }) : result && <Placeholder>No event today!</Placeholder>}
+            </Hours>
+            <h3>{choosenDateAndHour.length > 0 && (lang.node_locale === "hu" ? "Kiválaszott időpontok" : "Choosen events")}</h3>
+            <Selected>
+                {jesus.filter(el => choosenDateAndHour.includes(el.compare)).map(el => {
+                    let weekdayName = new Date(el.date).getDay() - 1
                     return (
-                        <p>{el.date.split("T").pop()}</p>
+                        <Item icon={el.icon}>
+                            <p>{el.title}</p>
+                            <p>{full_language[weekdayName]}</p>
+                            <b>{el.hour}</b>
+                            <span
+                                onClick={() =>
+                                    setChoosenDateAndHour(choosenDateAndHour.filter(item => item !== el.compare))}
+                            ><BsDashCircleFill /></span>
+                        </Item>
                     )
                 })}
-            </Hours>
+            </Selected>
         </Content>
 
     )
@@ -127,7 +182,8 @@ export const Content = styled.div`
     width: 100%;
 `
 export const Block = styled.div`
-    background-color: #f5f5f5; 
+    background-color: black; 
+    color: white;
     padding: 20px;
     margin: 10px 0 20px 0px;
     border-radius: 30px;
@@ -185,7 +241,7 @@ export const Num = styled.p`
     cursor: pointer;
     ${props => !(props.current_day > props.num + 1 && props.sameMonth) && props.dataArray.includes(props.value) ? 'background-color: #d9d9d9;' : null}
 
-    ${props => props.index + 1 === props.day && props.result ? 'background-color: #F3DFC1; font-weight: 700;' : null}
+    ${props => props.index + 1 === props.day && props.result ? 'background-color: black; font-weight: 700; color: white;' : null}
     ${props => props.current_day > props.num + 1 && props.sameMonth ? 'color: lightgrey !important;' : null}
 `
 
@@ -193,14 +249,50 @@ export const Hours = styled.div`
     display: flex;
     flex-direction: column;
     gap: 10px;
-    p {
-        width: 100%;
-        background-color: #f1f1f1;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 17px;
-        padding: 10px 0;
+    margin-bottom: 20px;
+`
+
+export const Selected = styled.div`
+    display: grid;
+    
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 15px;
+    @media (max-width: 650px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+`
+
+export const Item = styled.div`
+    background-color: #f8f8f8;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    padding: 12px;
+    border-radius: 15px;
+    display: flex;
+    height: 160px;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    background: url(${props => props.icon});
+    background-size: cover;
+    background-position: 50px 55px;
+    background-repeat: no-repeat;
+    b {
+        font-size: 25px;
+        z-index: 1;
+        background-color: white;
+        width: max-content;
+        padding: 1px 5px 0 5px;
+        border-radius: 6px;
+    }
+    span {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        z-index: 10;
+        color: salmon;
+        transform: scale(1.3);
+        border-radius: 50%;
+        cursor: pointer;
     }
 `
